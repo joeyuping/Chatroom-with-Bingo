@@ -1,0 +1,25 @@
+{
+  "name": "hw5",
+  "version": "1.0.0",
+  "description": "hw5",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "devStart": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "author": "Chang Yu Ping 812415001",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "jquery": "^3.7.1",
+    "socket.io": "^4.7.5"
+  },
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.1"
+  }
+}
