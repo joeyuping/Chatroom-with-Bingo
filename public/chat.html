@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>HW5</title>
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- tailwind -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.15/dist/tailwind.min.css" rel="stylesheet">
+    <!-- iconify -->
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+    <!-- socket io -->
+    <script
+      defer
+      src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <!-- custom js -->
+    <script
+      defer
+      src="client.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body class="flex flex-col h-screen pt-2 pb-5 pl-2 pr-2 bg-gray-100">
+    <header class="bg-gray-50 flex justify-between p-2 rounded shadow">
+      <div class="flex h-8 leading-8 align-middle">
+        <i class="ml-5">icon</i>
+        <h1>Chatroom</h1>
+      </div>
+      <div class="flex leading-8">
+        <iconify-icon icon="octicon:person-24" width="23"></iconify-icon>
+        <p class="ml-2" id="nickname"></p>
+        <button class="flex justify-center w-10 py-1 ml-5 bg-gray-400 rounded-full" id="logout"><iconify-icon class="flex flex-col justify-center" icon="heroicons-outline:logout" width="23"></iconify-icon></button>
+      </div>
+    </header>
+    <div class="flex flex-grow">
+      <div class="flex flex-col w-56 p-3 mt-2 bg-white rounded shadow"   id="sidebar">
+        <div class="flex justify-between w-full space-x-3">
+          <button class="button w-full" id="private">Private</button>
+          <button class="button w-full" id="group">Group</button>
+        </div>
+        <h2 class="mt-5 mb-2 ml-1">No. Users Online: <span id="num_users"></span></h2>
+        <hr/>
+        <ul class="mt-5" id="online_users">
+          <li class="user-card"><i></i>User1</li>
+        </ul>
+      </div>
+
+      <div id="chatroom" class="flex flex-col flex-grow p-3 mt-2 ml-2 bg-white rounded shadow">
+        <div class="px-2 my-2">
+          <i>people icon</i>
+          <h2 id="recipient"></h2>
+        </div>
+        <hr>
+        <div class="bg-gray-50 flex flex-col flex-grow p-5 my-2 overflow-y-scroll rounded shadow-inner" id="msg_history">
+        </div>
+        <div id="input_area">
+          <div class="my-2" id="options">
+            <button id="emoji">emoji</button>
+            <button id="image">image</button>
+            <button id="bingo">bingo</button>
+          </div>
+          <hr>
+          <div class="flex justify-between my-2">
+            <textarea 
+            class="bg-gray-50 text-wrap focus-within:outline-none flex flex-grow w-4/5 h-20 p-3 mr-5 border-gray-200 rounded shadow-inner resize-none"
+              id="msg" placeholder="Type message here" autofocus></textarea>
+            <button class="button self-end w-24 h-10"
+              id="send"
+              type="submit">
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  .button {
+    background-color: #62bbd6;
+    color: white;
+    padding: 5px 10px;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    &:hover {
+      filter: brightness(1.05);
+    }
+    &:active {
+      filter: brightness(0.9);
+    }
+  }
+
+  iconify-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .user-card {
+    display: flex;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgb(253, 253, 253);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  #msg_history {
+    /* hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .announcement {
+    color: #CCC;
+    font-style: italic;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .send {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: right;
+    align-items: flex-end;
+  }
+  
+  .send-msg {
+    background-color: #62bbd6;
+    max-width: 50%;
+    color: white;
+    padding: 5px 15px;
+    font-size: 16px;
+    margin: 4px 0px;
+    border-radius: 10px 0px 10px 10px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .receive {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: left;
+    align-items: flex-start;
+  }
+  
+  .receive-msg {
+    background-color: #62bbd6;
+    color: white;
+    max-width: 50%;
+    padding: 5px 15px;
+    font-size: 16px;
+    margin: 4px 0px;
+    border-radius: 0px 10px 10px 10px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  }
+</style>
