@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -12,23 +12,28 @@
     <script
       defer
       src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <!-- iconify -->
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <!-- custom js -->
     <script
       defer
       src="index.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <div>
-      <h1>Chatroom</h1>
-      <p>Please pick a nickname</p>
-      <input
+  <body class="flex items-center justify-center w-full h-full bg-gray-100">
+    <div class="rounded-3xl flex flex-col items-center justify-center p-12 text-center bg-white shadow-md">
+      <h1 class="font-serif text-3xl font-bold">Chatroom</h1>
+      <p class="mt-8">Please pick a nickname</p>
+      <input 
+      class="bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-100 w-52 mt-5 font-mono leading-10 text-center rounded shadow-inner"
       id="nickname"
       type="text"
       placeholder="Enter your nickname" />
-      <button
+      <button class="hover:brightness-105 active:brightness-95 flex items-center justify-center w-full p-2 mt-5 mb-6 font-bold text-white bg-blue-300 rounded"
       id="login"
       type="button">
+      <iconify-icon icon="uiw:login" width="18" class="flex flex-col justify-center mr-2"></iconify-icon>
       Login
       </button>
     </div>

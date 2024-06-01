@@ -8,8 +8,7 @@
   },
   "scripts": {
     "nodemon": "nodemon server.js",
-    "tailwind": "npx tailwindcss -i ./public/input.css -o ./public/styles.css",
-    "devStart": "npm run tailwind & npm run nodemon",
+    "dev": "npm run nodemon",
     "start": "node server.js"
   },
   "author": "Chang Yu Ping 812415001",

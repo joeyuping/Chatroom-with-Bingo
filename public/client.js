@@ -27,10 +27,14 @@ $(function () {
 
   $('#group').on('click', (e) => {
     mode = 'group';
+    $("#recipient").text("Group")
+    $("#recipient-icon").attr("icon", "octicon:people-24")
     RenderMsgHistory(msg_store[mode]);
   });
 
   $('#private').on('click', (e) => {
+    $("#recipient").text("")
+    $("#recipient-icon").attr("icon", "octicon:person-24")
     $('#msg_history').empty();
     RenderMsg({ from: 'announcement', text: 'Select a user to chat with' });
   });
@@ -44,6 +48,7 @@ socket.on('loginout', (data) => {
   users = data.users;
   AddToMsgStore(data.msg);
   RenderMsg(data.msg);
+  updateUserCards();
   updateNumUsers();
 });
 
@@ -112,6 +117,17 @@ class Msg {
 
 function updateNumUsers() {
   $('#num_users').text(Object.keys(users).length);
+}
+
+function updateUserCards() {
+  if (!users) {
+    return;
+  }
+  $('#online_users').empty();
+  Object.entries(users).forEach((user) => {
+    $('#online_users').append(`
+    <li class="user-card"><iconify-icon icon="carbon:user-avatar-filled-alt"></iconify-icon>${user[1]}</li>`)
+  });
 }
 
 function sendMsg() {

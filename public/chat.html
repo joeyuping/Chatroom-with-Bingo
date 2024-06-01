@@ -17,22 +17,24 @@
     <script
       defer
       src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- custom js -->
     <script
       defer
       src="client.js"></script>
     <link rel="stylesheet" href="styles.css" />
+    
   </head>
 
   <body class="flex flex-col h-screen pt-2 pb-5 pl-2 pr-2 bg-gray-100">
-    <header class="bg-gray-50 flex justify-between p-2 rounded shadow">
-      <div class="flex h-8 leading-8 align-middle">
-        <i class="ml-5">icon</i>
-        <h1>Chatroom</h1>
+    <header class="flex justify-between px-10 py-2 text-white bg-gray-500 rounded shadow">
+      <div class="flex leading-10 align-middle">
+        <iconify-icon class="mr-3" icon="mingcute:chat-4-fill" width="23"></iconify-icon>
+        <h1 class="text-bold font-serif text-xl">Chatroom</h1>
       </div>
       <div class="flex leading-8">
         <iconify-icon icon="octicon:person-24" width="23"></iconify-icon>
-        <p class="ml-2" id="nickname"></p>
+        <p class="ml-2 text-lg" id="nickname"></p>
         <button class="flex justify-center w-10 py-1 ml-5 bg-gray-400 rounded-full" id="logout"><iconify-icon class="flex flex-col justify-center" icon="heroicons-outline:logout" width="23"></iconify-icon></button>
       </div>
     </header>
@@ -45,23 +47,22 @@
         <h2 class="mt-5 mb-2 ml-1">No. Users Online: <span id="num_users"></span></h2>
         <hr/>
         <ul class="mt-5" id="online_users">
-          <li class="user-card"><i></i>User1</li>
         </ul>
       </div>
 
       <div id="chatroom" class="flex flex-col flex-grow p-3 mt-2 ml-2 bg-white rounded shadow">
-        <div class="px-2 my-2">
-          <i>people icon</i>
-          <h2 id="recipient"></h2>
+        <div class="flex px-2 my-2">
+          <iconify-icon id="recipient-icon" icon="octicon:people-24" width="30"></iconify-icon>
+          <h2 class="ml-2 text-xl font-bold" id="recipient">Group</h2>
         </div>
         <hr>
         <div class="bg-gray-50 flex flex-col flex-grow p-5 my-2 overflow-y-scroll rounded shadow-inner" id="msg_history">
         </div>
         <div id="input_area">
           <div class="my-2" id="options">
-            <button id="emoji">emoji</button>
-            <button id="image">image</button>
-            <button id="bingo">bingo</button>
+            <button id="emoji"><iconify-icon icon="fluent:emoji-sparkle-24-regular" width="30"></iconify-icon></button>
+            <button class="ml-1" id="image"><iconify-icon icon="bx:image-add" width="30"></iconify-icon></button>
+            <button class="ml-1" id="bingo"><iconify-icon icon="lucide:gamepad-2" width="30"></iconify-icon></button>
           </div>
           <hr>
           <div class="flex justify-between my-2">
@@ -82,7 +83,7 @@
 
 <style>
   .button {
-    background-color: #62bbd6;
+    background-color: #93c5fd;
     color: white;
     padding: 5px 10px;
     font-size: 16px;
