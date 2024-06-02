@@ -54,6 +54,27 @@ $(function () {
     RenderMsgHistory(msg_store[mode]);
   });
 
+  $(this).on('click', (e) => {
+    if (!$(e.target).closest('#emoji').length) {
+      $('#emoji-picker').hide();
+    }
+  });
+
+  $('#emoji').on('click', (e) => {
+    $('#emoji-picker').toggle();
+  });
+
+  // fill emoji container
+  for (let i = 128512; i <= 128591; i++) {
+    $('#emoji-container').append(`<span class="text-2xl cursor-pointer" onclick="addEmoji('&#${i};')">&#${i};</span>`);
+  }
+
+  $('#image').on('click', (e) => {
+    // open file dialog
+    
+    
+  });
+
   updateNumUsers();
 
   // TODO: Implement private chat
@@ -153,6 +174,10 @@ function sendMsg() {
   msg_store[mode].push({ msg, type: 'send' });
   RenderMsg(msg, 'send');
   socket.emit('sendmsg', msg);
+}
+
+function addEmoji(emoji) {
+  $('#msg').val($('#msg').val() + emoji);
 }
 
 class Msg {
