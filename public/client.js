@@ -1,7 +1,7 @@
 const socket = io.connect();
 var users = {};
 socket.on('connect', () => {
-  console.log('Connected to server');
+  console.log('Connected to server with id:', socket.id);
   const nickname = sessionStorage.getItem('nickname');
   socket.emit('login', { nickname });
   $('#nickname').text(nickname);
@@ -27,6 +27,7 @@ $(function () {
 
   $('#group').on('click', (e) => {
     mode = 'group';
+    $('#group').removeClass('dot');
     $("#recipient").text("Group")
     $("#recipient-icon").attr("icon", "octicon:people-24")
     RenderMsgHistory(msg_store[mode]);
@@ -36,83 +37,97 @@ $(function () {
     $("#recipient").text("")
     $("#recipient-icon").attr("icon", "octicon:person-24")
     $('#msg_history').empty();
-    RenderMsg({ from: 'announcement', text: 'Select a user to chat with' });
+    RenderMsg({ text: 'Select a user to chat with' }, 'announcement');
+  });
+
+  $('#logout').on('click', (e) => {
+    socket.close();
+    sessionStorage.removeItem('nickname');
+    window.location.href = '/';
+  });
+
+  $('#online_users').on('click', '.user-card', (e) => {
+    mode = e.target.id;
+    $(`#${mode}`).removeClass('dot');
+    $("#recipient").text(users[mode])
+    $("#recipient-icon").attr("icon", "octicon:person-24")
+    RenderMsgHistory(msg_store[mode]);
   });
 
   updateNumUsers();
 
-  // TODO: Implement private chat, render users list
+  // TODO: Implement private chat
 });
 
-socket.on('loginout', (data) => {
-  users = data.users;
-  AddToMsgStore(data.msg);
-  RenderMsg(data.msg);
+socket.on('welcome', (server_users) => {
+  users = server_users;
+  Object.keys(users).forEach((id) => {
+    msg_store[id] = [];
+  });
+  updateUserCards();
+  updateNumUsers();
+});
+
+socket.on('login', ({ msg, id, nickname }) => {
+  users[id] = nickname;
+  if (!msg_store[id]) {
+    msg_store[id] = [];
+  }
+  msg_store['group'].push({ msg, type: 'announcement' });
+  msg_store[id].push({ msg, type: 'announcement' });
+  if (mode == 'group' || mode == id) {
+    RenderMsg(msg, 'announcement');
+  }
+  updateUserCards();
+  updateNumUsers();
+});
+
+socket.on('logout', ({ msg, id }) => {
+  delete users[id];
+  msg_store['group'].push({ msg, type: 'announcement' });
+  msg_store[id].push({ msg, type: 'announcement' });
+  if (mode == 'group' || mode == id) {
+    RenderMsg(msg, 'announcement');
+  }
   updateUserCards();
   updateNumUsers();
 });
 
 socket.on('receivemsg', (msg) => {
-  if (msg.from == 'announcement') {
-    updateNumUsers();
+  const store_id = msg.to == 'group' ? 'group' : msg.from;
+  msg_store[store_id].push({ msg, type: 'receive' });
+  if (mode == store_id) {
+    RenderMsg(msg, 'receive');
+    return;
   }
-  AddToMsgStore(msg);
-  RenderMsg(msg);
+  $(`#${store_id}`).addClass('dot');
 });
 
 function RenderMsgHistory(msg_list) {
   $('#msg_history').empty();
-  msg_list.map((msg) => {
-    RenderMsg(msg);
+  if (!msg_list) return;
+  msg_list.map(({ msg, type }) => {
+    RenderMsg(msg, type);
   });
 }
 
-function RenderMsg(msg) {
+function RenderMsg(msg, type) {
   // replace line breaks with <br> tags
   const text = msg.text.replace(/\n\r?/g, '<br>');
-  var type;
-  switch (msg.from) {
-    case 'announcement':
-      type = 'announcement';
-      break;
-    case socket.id:
-      type = 'send';
-      break;
-    default:
-      type = 'receive';
-  }
+  const msg_history = $('#msg_history');
   if (type == 'announcement') {
-    $('#msg_history').append(
+    msg_history.append(
       `<div class="${type}">
-        <div class="${type}-msg">${text}</div>
-      </div>
-      `);
+        <div>${text}</div>
+      </div>`);
     return;
   }
-  $('#msg_history').append(
+  msg_history.append(
     `<div class="${type}">
       <div class="name">${type == 'send' ? 'Me' : users[msg.from]}</div>
       <div class="${type}-msg">${text}</div>
-      </div>
-      `);
-}
-
-function AddToMsgStore(msg) {
-  if (!msg.text) {
-    return;
-  }
-  if (!msg_store[msg.mode]) {
-    msg_store[msg.mode] = [];
-  }
-  msg_store[msg.mode].push(msg);
-}
-
-class Msg {
-  constructor(mode = null, from, text) {
-    this.mode = mode; // 'group' or combination of two socket ids for private chat
-    this.from = from; // socket_id, or 'announcement'
-    this.text = text; // message text
-  }
+    </div>`);
+  msg_history.scrollTop(msg_history[0].scrollHeight);
 }
 
 function updateNumUsers() {
@@ -120,23 +135,30 @@ function updateNumUsers() {
 }
 
 function updateUserCards() {
-  if (!users) {
-    return;
-  }
+  if (!users) return;
   $('#online_users').empty();
-  Object.entries(users).forEach((user) => {
+
+  for (const user_id in users) {
+    if (user_id == socket.id) continue;
+
     $('#online_users').append(`
-    <li class="user-card"><iconify-icon icon="carbon:user-avatar-filled-alt"></iconify-icon>${user[1]}</li>`)
-  });
+    <li class="user-card flex items-center relative" id="${user_id}"><iconify-icon class="mr-2" icon="carbon:user-avatar-filled-alt" width="28"></iconify-icon>${users[user_id]}</li>`)
+  }
 }
 
 function sendMsg() {
-  if (!$('#msg').val()) {
-    return;
-  }
+  if (!$('#msg').val()) return;
   const msg = new Msg(mode, socket.id, $('#msg').val());
   $('#msg').val('');
-  AddToMsgStore(msg);
-  RenderMsg(msg);
+  msg_store[mode].push({ msg, type: 'send' });
+  RenderMsg(msg, 'send');
   socket.emit('sendmsg', msg);
+}
+
+class Msg {
+  constructor(to, from, text) {
+    this.to = to; // 'group' or combination of two socket ids for private chat
+    this.from = from; // socket_id, or 'announcement'
+    this.text = text; // message text
+  }
 }

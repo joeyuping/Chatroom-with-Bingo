@@ -39,7 +39,7 @@
       </div>
     </header>
     <div class="flex flex-grow">
-      <div class="flex flex-col w-56 p-3 mt-2 bg-white rounded shadow"   id="sidebar">
+      <div class="flex flex-col w-56 p-3 mt-2 bg-white rounded shadow" id="sidebar">
         <div class="flex justify-between w-full space-x-3">
           <button class="button w-full" id="private">Private</button>
           <button class="button w-full" id="group">Group</button>
@@ -56,11 +56,15 @@
           <h2 class="ml-2 text-xl font-bold" id="recipient">Group</h2>
         </div>
         <hr>
-        <div class="bg-gray-50 flex flex-col flex-grow p-5 my-2 overflow-y-scroll rounded shadow-inner" id="msg_history">
+        <div class="bg-[url('sky.jpg')] bg-no-repeat bg-cover flex flex-col flex-grow h-1 p-5 my-2 overflow-y-auto rounded shadow-inner" id="msg_history">
         </div>
         <div id="input_area">
           <div class="my-2" id="options">
             <button id="emoji"><iconify-icon icon="fluent:emoji-sparkle-24-regular" width="30"></iconify-icon></button>
+            <div id="emoji-picker" class="absolute z-10 hidden bg-blue-300 rounded shadow-lg">
+              <div id="emoji-container" class="flex flex-wrap p-2">
+              </div>
+            </div>
             <button class="ml-1" id="image"><iconify-icon icon="bx:image-add" width="30"></iconify-icon></button>
             <button class="ml-1" id="bingo"><iconify-icon icon="lucide:gamepad-2" width="30"></iconify-icon></button>
           </div>
@@ -83,6 +87,10 @@
 
 <style>
   .button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: #93c5fd;
     color: white;
     padding: 5px 10px;
@@ -109,12 +117,43 @@
     display: flex;
     padding: 15px;
     border-radius: 5px;
+    border: 1px solid #eeeeee;
     background-color: rgb(253, 253, 253);
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
     font-weight: bold;
     &:hover {
       background-color: #f3f4f6;
     }
+  }
+
+  .dot::after {
+    position: absolute;
+    content: "";
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    background-color: #bb0000;
+    border-radius: 50%;
+    right: 8px;
+    z-index: 10;
+  }
+
+  .announcement {
+    width: fit-content;
+    padding: 2px 10px;
+    margin: 2px auto;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-style: italic;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .name {
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 2px gray, 0 -1px 2px gray, 1px 0 2px gray, -1px 0 2px gray;
   }
 
   #msg_history {
@@ -124,13 +163,6 @@
     &::-webkit-scrollbar {
       display: none;
     }
-  }
-
-  .announcement {
-    color: #CCC;
-    font-style: italic;
-    text-align: center;
-    font-size: 14px;
   }
 
   .send {
@@ -149,7 +181,7 @@
     font-size: 16px;
     margin: 4px 0px;
     border-radius: 10px 0px 10px 10px;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 4px 0 black;
   }
 
   .receive {
@@ -168,6 +200,6 @@
     font-size: 16px;
     margin: 4px 0px;
     border-radius: 0px 10px 10px 10px;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 4px 0 black;
   }
 </style>

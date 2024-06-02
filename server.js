@@ -1,7 +1,6 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import bodyParser from "body-parser";
 
 const app = express();
 const server = createServer(app);
@@ -26,38 +25,40 @@ server.listen(port, () => {
 
 const users = {};
 io.on('connection', (socket) => {
-  socket.on('login', (data) => {
-    users[socket.id] = data.nickname;
-    socket.join('group');
-    io.to('group').emit('loginout',
+  socket.emit('welcome', users);
+  socket.on('login', ({ nickname }) => {
+    users[socket.id] = nickname;
+    const announcement = `${users[socket.id]} joined`
+    io.emit('login',
       {
-        msg: new Msg('group', 'announcement', `${users[socket.id]} joined the chat`),
-        users
+        msg: new Msg('group', 'group', announcement),
+        id: socket.id,
+        nickname: users[socket.id]
       });
-    console.log(`${users[socket.id]} connected`);
+    console.log(announcement);
   });
-  // remove user from users object when they disconnect
   socket.on('disconnect', () => {
-    console.log(`${users[socket.id]} disconnected`);
-    io.to('group').emit('loginout',
-      {
-        msg: new Msg('group', 'announcement', `${users[socket.id]} left the chat`),
-        users
-      });
+    const announcement = `${users[socket.id]} left`;
     delete users[socket.id];
+    io.emit('logout',
+      {
+        msg: new Msg('group', 'group', announcement),
+        id: socket.id
+      });
+    console.log(announcement);
   });
   socket.on('sendmsg', (msg) => {
-    if (msg.mode === 'group') {
+    if (msg.to === 'group') {
       socket.broadcast.emit('receivemsg', msg);
-    } else {
-      io.to(msg.mode).emit('receivemsg', msg);
+      return;
     }
+    io.to(msg.to).emit('receivemsg', msg);
   });
 });
 
 class Msg {
-  constructor(mode = null, from, text) {
-    this.mode = mode; // 'group' or combination of two socket ids for private chat
+  constructor(to, from, text) {
+    this.to = to; // 'group' or combination of two socket ids for private chat
     this.from = from; // from_socket_id, or 'announcement'
     this.text = text; // message text
   }
