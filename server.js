@@ -7,8 +7,9 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST']
-    // because using different ports for socket.io and express, need to allow all origins
+    methods: ['GET', 'POST'],
+    chunkSize: 1e3,
+    maxHttpBufferSize: 1e8
   }
 });
 
@@ -37,7 +38,8 @@ io.on('connection', (socket) => {
       });
     console.log(announcement);
   });
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (reason) => {
+    console.log(reason)
     const announcement = `${users[socket.id]} left`;
     delete users[socket.id];
     io.emit('logout',
@@ -57,9 +59,9 @@ io.on('connection', (socket) => {
 });
 
 class Msg {
-  constructor(to, from, text) {
+  constructor(to, from, body) {
     this.to = to; // 'group' or combination of two socket ids for private chat
-    this.from = from; // from_socket_id, or 'announcement'
-    this.text = text; // message text
+    this.from = from; // socket_id, or 'announcement'
+    this.body = body; // message body
   }
 }

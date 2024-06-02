@@ -67,13 +67,13 @@
               </div>
             </button>
             <label for="image"><iconify-icon class="cursor-pointer" icon="bx:image-add" width="30"></iconify-icon></label>
-            <input type="file" class="hidden" id="image"></input>
+            <input type="file" class="hidden" id="image" multiple></input>
             <button id="bingo"><iconify-icon icon="lucide:gamepad-2" width="30"></iconify-icon></button>
           </div>
           <hr>
           <div class="flex justify-between my-2">
             <textarea 
-            class="bg-gray-50 text-wrap focus-within:outline-none flex flex-grow w-4/5 h-20 p-3 mr-5 border-gray-200 rounded shadow-inner resize-none"
+            class="text-wrap focus-within:outline-none flex flex-grow w-4/5 h-20 p-3 mr-5 bg-white border-gray-200 rounded shadow-inner resize-none"
               id="msg" placeholder="Type message here" autofocus></textarea>
             <button class="button self-end w-24 h-10"
               id="send"

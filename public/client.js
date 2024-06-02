@@ -69,15 +69,24 @@ $(function () {
     $('#emoji-container').append(`<span class="text-2xl cursor-pointer" onclick="addEmoji('&#${i};')">&#${i};</span>`);
   }
 
-  $('#image').on('click', (e) => {
-    // open file dialog
-    
-    
+  $('#image').on('change', (e) => {
+    const files = e.target.files;
+    Object.keys(files).forEach((i) => {
+      const file = files[i];
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const msg = new Msg(mode, socket.id, `<img src="${e.target.result}" alt="image" class="w-64">`);
+        msg_store[mode].push({ msg, type: 'send' });
+        RenderMsg(msg, 'send');
+        socket.emit('sendmsg', msg);
+      };
+      reader.readAsDataURL(file);
+    });
   });
-
-  updateNumUsers();
-
-  // TODO: Implement private chat
 });
 
 socket.on('welcome', (server_users) => {
@@ -134,7 +143,7 @@ function RenderMsgHistory(msg_list) {
 
 function RenderMsg(msg, type) {
   // replace line breaks with <br> tags
-  const text = msg.text.replace(/\n\r?/g, '<br>');
+  const text = msg.body.replace(/\n\r?/g, '<br>');
   const msg_history = $('#msg_history');
   if (type == 'announcement') {
     msg_history.append(
@@ -181,9 +190,9 @@ function addEmoji(emoji) {
 }
 
 class Msg {
-  constructor(to, from, text) {
+  constructor(to, from, body) {
     this.to = to; // 'group' or combination of two socket ids for private chat
     this.from = from; // socket_id, or 'announcement'
-    this.text = text; // message text
+    this.body = body; // message body
   }
 }
