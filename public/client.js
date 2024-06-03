@@ -73,16 +73,20 @@ $(function () {
     const files = e.target.files;
     Object.keys(files).forEach((i) => {
       const file = files[i];
+      // if (file.size > 5e5) {
+      //   alert('File size must be less than 500KB');
+      //   return;
+      // }
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file');
         return;
       }
       const reader = new FileReader();
       reader.onload = (e) => {
+        // log size of e.target.result
+        console.log('Size of image:', e.target.result.length);
         const msg = new Msg(mode, socket.id, `<img src="${e.target.result}" alt="image" class="w-64">`);
-        msg_store[mode].push({ msg, type: 'send' });
-        RenderMsg(msg, 'send');
-        socket.emit('sendmsg', msg);
+        sendMsg(msg);
       };
       reader.readAsDataURL(file);
     });
@@ -133,6 +137,8 @@ socket.on('receivemsg', (msg) => {
   $(`#${store_id}`).addClass('dot');
 });
 
+
+
 function RenderMsgHistory(msg_list) {
   $('#msg_history').empty();
   if (!msg_list) return;
@@ -176,10 +182,12 @@ function updateUserCards() {
   }
 }
 
-function sendMsg() {
-  if (!$('#msg').val()) return;
-  const msg = new Msg(mode, socket.id, $('#msg').val());
-  $('#msg').val('');
+function sendMsg(msg = null) {
+  if (!msg) {
+    if (!$('#msg').val()) return;
+    const msg = new Msg(mode, socket.id, $('#msg').val());
+    $('#msg').val('');
+  }
   msg_store[mode].push({ msg, type: 'send' });
   RenderMsg(msg, 'send');
   socket.emit('sendmsg', msg);

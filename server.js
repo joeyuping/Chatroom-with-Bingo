@@ -8,9 +8,8 @@ const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
-    chunkSize: 1e3,
-    maxHttpBufferSize: 1e8
-  }
+  },
+  maxHttpBufferSize: 1e8
 });
 
 app.use(express.static('public'));
@@ -56,6 +55,18 @@ io.on('connection', (socket) => {
     }
     io.to(msg.to).emit('receivemsg', msg);
   });
+  socket.on('initBingo', () => {
+    const roomID = Math.random().toString(36).substring(7);
+    socket.emit('okBingo', roomID);
+  });
+  socket.on('joinBingo', (roomID) => {
+    socket.join(roomID);
+    console.log(`User ${users[socket.id]} joined room ${roomID}`);
+    if (io.sockets.adapter.rooms.get(roomID).size === 2) {
+      io.to(roomID).emit('startBingo');
+    }
+  });
+
 });
 
 class Msg {
