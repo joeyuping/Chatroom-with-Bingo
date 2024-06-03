@@ -24,6 +24,7 @@ server.listen(port, () => {
 });
 
 const users = {};
+const rooms = {};
 io.on('connection', (socket) => {
   socket.emit('welcome', users);
   socket.on('login', ({ nickname }) => {
@@ -59,14 +60,41 @@ io.on('connection', (socket) => {
     const roomID = Math.random().toString(36).substring(7);
     socket.emit('okBingo', roomID);
   });
+
+  var turn = null;
   socket.on('joinBingo', (roomID) => {
+    if (!rooms[roomID]) {
+      rooms[roomID] = [];
+    }
+    rooms[roomID].push(socket.id);
     socket.join(roomID);
     console.log(`User ${users[socket.id]} joined room ${roomID}`);
-    if (io.sockets.adapter.rooms.get(roomID).size === 2) {
-      io.to(roomID).emit('startBingo');
+    if (rooms[roomID].length == 2) {
+      // random select one player to start
+      turn = Math.random() < 0.5;
+
+      io.to(rooms[roomID][0]).emit('startGame', turn);
+      io.to(rooms[roomID][1]).emit('startGame', !turn);
     }
   });
 
+  socket.on('endTurn', ({ roomID, num }) => {
+    turn = !turn;
+    io.to(rooms[roomID][turn ? 0 : 1])
+      .emit('nextTurn', num);
+  });
+
+  socket.on('endGame', (roomID) => {
+    io.to(roomID).emit('endGame', socket.id);
+    delete rooms[roomID];
+    io.socketsLeave(roomID);
+  });
+
+  socket.on('exitBingo', (roomID) => {
+    io.to(roomID).emit('exitBingo', roomID);
+    delete rooms[roomID];
+    io.socketsLeave(roomID);
+  });
 });
 
 class Msg {

@@ -137,8 +137,6 @@ socket.on('receivemsg', (msg) => {
   $(`#${store_id}`).addClass('dot');
 });
 
-
-
 function RenderMsgHistory(msg_list) {
   $('#msg_history').empty();
   if (!msg_list) return;
@@ -148,6 +146,7 @@ function RenderMsgHistory(msg_list) {
 }
 
 function RenderMsg(msg, type) {
+  if (!msg) return;
   // replace line breaks with <br> tags
   const text = msg.body.replace(/\n\r?/g, '<br>');
   const msg_history = $('#msg_history');

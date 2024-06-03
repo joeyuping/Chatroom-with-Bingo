@@ -1,45 +1,18 @@
-$(function () {
-  $('#bingo').on('click', (e) => {
-    if (mode == 'group') {
-      alert('Please select a user to play Bingo with');
-      return;
-    }
-    socket.emit('initBingo')
-  });
-
-  $('#bingo-board').on('click', '.dice', function () {
-    if (!game_started) {
-      alert('Game not started yet! Please wait for the other player to join.');
-    }
-    $(this).addClass('selected');
-    const selected = parseInt($(this).attr('id'))
-    selected_numbers.push(selected);
-    endTurn(selected);
-  });
-})
-
-socket.on('okBingo', (roomID) => {
-  const msg = new Msg(mode, socket.id, `<button onclick="joinBingo(${roomID})">Lets play Bingo!\n>>>>>>>>>> GO!</button>`);
-  sendMsg(msg);
-});
-
-function joinBingo(roomID) {
-  socket.emit('joinBingo', roomID);
-  // TODO: open bingo, show waiting for other player
-}
-
-socket.on('startBingo', () => {
-  // TODO: start bingo
-});
-
-
 var selected_numbers = [];
 var bingo_positions = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], [16, 17, 18, 19, 20], [21, 22, 23, 24, 25], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24], [5, 10, 15, 20, 25], [1, 7, 13, 19, 25], [5, 9, 13, 17, 21]];
 var bingo_numbers = [];
 var num_lines = 0;
 var game_started = false;
+var roomID_client = null;
 
-function startBingo() {
+socket.on('okBingo', (roomID) => {
+  const msg = new Msg(mode, socket.id, `<button id="${roomID}" onclick="joinBingo('${roomID}')"'>Lets play Bingo!\n>>>>>>>>>> GO!</button>`);
+  sendMsg(msg);
+});
+
+function joinBingo(roomID) {
+  roomID_client = roomID;
+  $(`#${roomID}`).attr('disabled', true);
   const num1to25 = Array.from({ length: 25 }, (v, i) => i + 1);
   num1to25.sort(() => Math.random() - 0.5);
   bingo_numbers = bingo_positions.map((bingo) => bingo.map((num) => num1to25[num-1]));
@@ -56,13 +29,30 @@ function startBingo() {
       dice.addClass('animate-fade-down');
     }, i * 50);
   }
+  setTimeout(() => {
+    $('#bingo').find('.dice').removeClass('animate-fade-down');
+  }, 25 * 50);
+  socket.emit('joinBingo', roomID);
 }
 
 socket.on('startGame', (myturn) => {
   $('#exit').attr('disabled', true).attr('style', 'color: gray;')
   game_started = true;
-  // TODO: server assign myturn
   myturn? myTurn() : endTurn();
+});
+
+socket.on('nextTurn', (num) => {
+  myTurn(num)
+});
+
+socket.on('endGame', (winner) => {
+  winner == socket.id ? $('#win').show() : $('#lose').show();
+});
+
+socket.on('exitBingo', (roomID) => {
+  console.log('exitBingo');
+  $(`#${roomID}`).attr('disabled', true);
+  exitBingo();
 });
 
 function endTurn(num=null) {
@@ -73,9 +63,8 @@ function endTurn(num=null) {
   }, 800);
   $('.dice').attr('disabled', true).addClass('cursor-not-allowed');
 
-  // TODO： send selected_numbers to opponent
   if (num) {
-    
+    socket.emit('endTurn', { roomID: roomID_client, num });
   }
 }
 
@@ -104,12 +93,16 @@ function checkBingo() {
     }
   }
   if (num_lines >= 5) {
-    $('#won').show();
-
-    // TODO: send win message to opponent
-
+    socket.emit('endGame', roomID_client);
     return true;
   }
+  return false;
+}
+
+function cancelBingo() {
+  // TODO: cancel not working
+  socket.emit('exitBingo', roomID_client);
+  sendMsg(new Msg(mode, socket.id, 'The Bingo game was canceled'));
 }
 
 function exitBingo() {
@@ -117,13 +110,13 @@ function exitBingo() {
   setTimeout(() => {
     selected_numbers = [];
     num_lines = 0;
+    roomID_client = null;
+    game_started = false;
     $('#num-lines').text(num_lines);
     $('#game-info').text('Waiting ... <br>for other player');
-    $('#won').hide();
+    $('#win').hide();
     $('#bingo-board').html('');
     $('#bingo').hide();
     $('#bingo').removeClass('animate-fade-out');
   }, 400);
-  
-  // TODO: send exit message to opponent
 }
