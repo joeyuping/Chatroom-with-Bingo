@@ -6,7 +6,7 @@ var game_started = false;
 var roomID_client = null;
 
 socket.on('okBingo', (roomID) => {
-  const msg = new Msg(mode, socket.id, `<button id="${roomID}" onclick="joinBingo('${roomID}')"'>Lets play Bingo!\n>>>>>>>>>> GO!</button>`);
+  const msg = new Msg(mode, socket.id, `<button id="${roomID}" onclick="joinBingo(${roomID})"'>Lets play Bingo!\n>>>>>>>>>> GO!</button>`);
   sendMsg(msg);
 });
 
@@ -41,20 +41,6 @@ socket.on('startGame', (myturn) => {
   myturn? myTurn() : endTurn();
 });
 
-socket.on('nextTurn', (num) => {
-  myTurn(num)
-});
-
-socket.on('endGame', (winner) => {
-  winner == socket.id ? $('#win').show() : $('#lose').show();
-});
-
-socket.on('exitBingo', (roomID) => {
-  console.log('exitBingo');
-  $(`#${roomID}`).attr('disabled', true);
-  exitBingo();
-});
-
 function endTurn(num=null) {
   if (checkBingo()) return;
   $('#game-info').text('Others turn ...').attr('style', 'color: red;').addClass('animate-shake');
@@ -67,6 +53,10 @@ function endTurn(num=null) {
     socket.emit('endTurn', { roomID: roomID_client, num });
   }
 }
+
+socket.on('nextTurn', (num) => {
+  myTurn(num)
+});
 
 function myTurn(num=null) {
   if (num) {
@@ -82,6 +72,17 @@ function myTurn(num=null) {
   }, 800);
   $('.dice').attr('disabled', false).removeClass('cursor-not-allowed');
 }
+
+socket.on('endGame', (winner) => {
+  winner == socket.id ? $('#win').show() : $('#lose').show();
+});
+
+socket.on('exitBingo', (roomID) => {
+  console.log('exitBingo');
+  $(`#${roomID}`).attr('disabled', true);
+  exitBingo();
+});
+
 
 function checkBingo() {
   num_lines = 0;

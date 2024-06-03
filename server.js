@@ -63,11 +63,7 @@ io.on('connection', (socket) => {
 
   var turn = null;
   socket.on('joinBingo', (roomID) => {
-    if (!rooms[roomID]) {
-      rooms[roomID] = [];
-    }
     rooms[roomID].push(socket.id);
-    socket.join(roomID);
     console.log(`User ${users[socket.id]} joined room ${roomID}`);
     if (rooms[roomID].length == 2) {
       // random select one player to start
