@@ -102,8 +102,8 @@ io.on('connection', (socket) => {
     }, 2000);
   });
 
-  socket.on('exitBingo', ({ to, roomID }) => {
-    io.to(to).emit('exitBingo', roomID);
+  socket.on('exitBingo', ({ to, from, roomID }) => {
+    io.to(to).emit('exitBingo', { from, roomID });
     delete rooms[roomID];
   });
 });

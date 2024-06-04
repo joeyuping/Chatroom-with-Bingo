@@ -27,7 +27,7 @@ $(function () {
 });
 
 socket.on('okBingo', (roomID) => {
-  const msg = new Msg(mode, socket.id, `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')"'>Lets play Bingo!\n>>>>>>>>>> GO!</button>`);
+  const msg = new Msg(mode, socket.id, `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')">Lets play Bingo!\n>>>>>>>>>> GO!</button>`);
   sendMsg(msg);
 });
 
@@ -99,7 +99,9 @@ function myTurn(num=null) {
 }
 
 function shuffle() {
+  $('#shuffle').show();
   setTimeout(() => {
+    $('#shuffle').hide();
     // shuffle the number positions
     const num1to25 = Array.from({ length: 25 }, (v, i) => i + 1);
     num1to25.sort(() => Math.random() - 0.5);
@@ -112,16 +114,11 @@ function shuffle() {
       }
     });
     $('#bingo-board').html(dices.join(''));
-    checkBingo();
   }, 2000);
 }
 
 function endTurn(num = null) {
   if (num && $(`#${num}`).hasClass('shuffle')) {
-    $('#shuffle').show();
-    setTimeout(() => {
-      $('#shuffle').hide();
-    }, 2000);
     $(`#${num}`).removeClass('shuffle');
     shuffle();
   }
@@ -159,13 +156,14 @@ socket.on('endGame', () => {
 });
 
 function cancelBingo() {
-  socket.emit('exitBingo', { to: mode, roomID: roomID_client });
+  socket.emit('exitBingo', { to: mode, from: socket.id, roomID: roomID_client });
   sendMsg(new Msg(mode, socket.id, 'The Bingo game was canceled'));
   leaveBingo();
 }
 
-socket.on('exitBingo', (roomID) => {
+socket.on('exitBingo', ({ from, roomID }) => {
   $(`#${roomID}`).attr('disabled', true);
+  msg_store[from].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`)).body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
   leaveBingo();
 });
 
@@ -175,6 +173,8 @@ function exitBingo() {
 }
 
 function leaveBingo() {
+  roomID = roomID_client;
+  msg_store[mode].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`)).body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
   $('#bingo').addClass('animate-fade-out')
   setTimeout(() => {
     resetBingo();

@@ -131,10 +131,6 @@ socket.on('receivemsg', (msg) => {
   } else {
     $(`#${store_id}`).addClass('dot');
   }
-  if (msg.body.startsWith('<button')) {
-    // insert disabled
-    msg.body = msg.body.replace('>', ' disabled>');
-  }
   msg_store[store_id].push({ msg, type: 'receive' });
 });
 
@@ -195,11 +191,6 @@ function sendMsg(msg = null) {
 
   socket.emit('sendmsg', mail);
   RenderMsg(mail, 'send');
-
-  if (mail.body.startsWith('<button')) {
-    // insert disabled
-    mail.body = mail.body.replace('>', ' disabled>');
-  }
   msg_store[mode].push({ msg: mail, type: 'send' });
 }
 
