@@ -128,14 +128,14 @@ socket.on('receivemsg', (msg) => {
 
   if (mode == store_id) {
     RenderMsg(msg, 'receive');
-    return;
+  } else {
+    $(`#${store_id}`).addClass('dot');
   }
   if (msg.body.startsWith('<button')) {
     // insert disabled
     msg.body = msg.body.replace('>', ' disabled>');
   }
   msg_store[store_id].push({ msg, type: 'receive' });
-  $(`#${store_id}`).addClass('dot');
 });
 
 function RenderMsgHistory(msg_list) {
