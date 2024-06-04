@@ -133,6 +133,12 @@ iconify-icon {
   border: 1px solid #ccc; 
 }
 
+.rainbow-text {
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+  background-clip: text;   
+  color: transparent;
+}
+
 .animate-fade-down {
   animation: fade-down 0.8s ease-out forwards;
 }

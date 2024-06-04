@@ -27,6 +27,7 @@ const users = {};
 const rooms = {};
 io.on('connection', (socket) => {
   socket.emit('welcome', users);
+
   socket.on('login', ({ nickname }) => {
     users[socket.id] = nickname;
     const announcement = `${users[socket.id]} joined`
@@ -38,6 +39,7 @@ io.on('connection', (socket) => {
       });
     console.log(announcement);
   });
+
   socket.on('disconnect', (reason) => {
     console.log(reason)
     const announcement = `${users[socket.id]} left`;
@@ -49,6 +51,7 @@ io.on('connection', (socket) => {
       });
     console.log(announcement);
   });
+
   socket.on('sendmsg', (msg) => {
     if (msg.to === 'group') {
       socket.broadcast.emit('receivemsg', msg);
@@ -56,40 +59,52 @@ io.on('connection', (socket) => {
     }
     io.to(msg.to).emit('receivemsg', msg);
   });
-  socket.on('initBingo', () => {
+
+  socket.on('initBingo', (id) => {
     const roomID = Math.random().toString(36).substring(7);
+    rooms[roomID] = { [socket.id]: false, [id]: false };
     socket.emit('okBingo', roomID);
   });
 
-  var turn = null;
   socket.on('joinBingo', (roomID) => {
-    rooms[roomID].push(socket.id);
+    if (!rooms[roomID]) {
+      console.log(`Room ${roomID} does not exist`);
+      return;
+    }
+    rooms[roomID][socket.id] = true;
     console.log(`User ${users[socket.id]} joined room ${roomID}`);
-    if (rooms[roomID].length == 2) {
-      // random select one player to start
-      turn = Math.random() < 0.5;
-
-      io.to(rooms[roomID][0]).emit('startGame', turn);
-      io.to(rooms[roomID][1]).emit('startGame', !turn);
+    if (Object.values(rooms[roomID]).every((v) => v)) {
+      setTimeout(() => {
+        startGame(roomID);
+      }, 2000);
     }
   });
 
-  socket.on('endTurn', ({ roomID, num }) => {
-    turn = !turn;
-    io.to(rooms[roomID][turn ? 0 : 1])
-      .emit('nextTurn', num);
+  function startGame(roomID) {
+  // random select one player to start
+    const turn = Math.random() < 0.5;
+    io.to(Object.keys(rooms[roomID])[0]).emit('startGame', turn);
+    io.to(Object.keys(rooms[roomID])[1]).emit('startGame', !turn);
+  }
+
+  socket.on('nextTurn', ({ to, num }) =>
+    io.to(to).emit('nextTurn', num)
+  );
+
+  socket.on('endGame', ({ to, roomID }) => {
+    io.to(to).emit('endGame');
   });
 
-  socket.on('endGame', (roomID) => {
-    io.to(roomID).emit('endGame', socket.id);
-    delete rooms[roomID];
-    io.socketsLeave(roomID);
+  socket.on('replayBingo', ({ to, roomID }) => {
+    io.to(to).emit('replayBingo');
+    setTimeout(() => {
+      startGame(roomID);
+    }, 2000);
   });
 
-  socket.on('exitBingo', (roomID) => {
-    io.to(roomID).emit('exitBingo', roomID);
+  socket.on('exitBingo', ({ to, roomID }) => {
+    io.to(to).emit('exitBingo', roomID);
     delete rooms[roomID];
-    io.socketsLeave(roomID);
   });
 });
 

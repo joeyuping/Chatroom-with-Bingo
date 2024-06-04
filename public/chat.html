@@ -94,41 +94,30 @@
         <div id="bingo-monitor" class="rounded-xl w-52 h-52 flex flex-col items-center justify-between p-3 bg-gray-300">
           <div id="game-info" class="mt-3 text-xl font-bold">Waiting ... <br>for other player</div>
           <div>Bingos:<span id="num-lines" class="ml-3 text-3xl font-bold">0</span></div>
-          <button id="exit" onclick="cancelBingo()" class="rounded-xl w-full py-1 bg-blue-300">Cancel</button> 
+          <button id="cancel" onclick="cancelBingo()" class="rounded-xl w-full py-1 bg-blue-300">Cancel</button> 
           
-          <div id="win" class="rounded-xl bg-white/40 absolute flex flex-col items-center justify-center w-full h-full select-none" style="display: none">
-            <img class="opacity-60 absolute w-full h-full select-none" src="confetti.gif">
+          <div id="win" class="rounded-xl bg-white/40 animate-fade-in absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full select-none" style="display: none">
+            <img class="opacity-60 absolute object-cover w-full h-full select-none" src="confetti.gif">
             <div class="animate-pulse z-10 text-3xl font-bold select-none">Bingo! You won!</div>
-            <button onclick="exitBingo()" class="rounded-xl z-10 w-40 py-1 mt-5 bg-blue-300">Exit</button>
+            <div class="flex space-x-5 text-white">
+              <button onclick="exitBingo()" class="rounded-xl z-10 w-40 py-1 mt-5 bg-red-700">Exit</button>
+              <button name="play-again" onclick="playAgain()" class="rounded-xl z-10 w-40 py-1 mt-5 bg-blue-300">Play again!</button>
+            </div>
           </div>
           
-          <div id="loss" class="rounded-xl bg-black/40 animate-fade-down absolute flex flex-col items-center justify-center w-full h-full select-none" style="display: none">
-            <div class="animate-pulse z-10 text-3xl font-bold select-none">You loss...</div>
-            <button onclick="exitBingo()" class="rounded-xl z-10 w-40 py-1 mt-5 bg-blue-300">Exit</button>
+          <div id="lose" class="rounded-xl bg-black/70 animate-fade-in absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full text-white select-none" style="display: none">
+            <div class="animate-pulse z-10 text-3xl font-bold select-none">You lose...</div>
+            <div class="flex space-x-5">
+              <button onclick="exitBingo()" class="rounded-xl z-10 w-40 py-1 mt-5 bg-red-700">Exit</button>
+              <button name="play-again" onclick="playAgain()" class="rounded-xl z-10 w-40 py-1 mt-5 bg-blue-300">Play again!</button>
+            </div>
           </div>
+
+          <div id="shuffle" class="rounded-xl bg-white/70 animate-fade-in absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full select-none" style="display: none">
+            <div class="animate-pulse z-10 text-3xl font-bold select-none">You clicked on </div><span id="shuffle-card" class="animate-fade-down rainbow-text z-10 text-3xl font-bold select-none">SHUFFLE</span>
+          </div>
+
       </div>
     </div>
   </body>
-  <script>
-    $(function () {
-      $('#startBingo').on('click', (e) => {
-        if (mode == 'group') {
-          alert('Please select a user to play Bingo with');
-          return;
-        }
-        socket.emit('initBingo')
-      });
-
-      $('#bingo-board').on('click', '.dice', function () {
-        if (!game_started) {
-          alert('Game not started yet! Please wait for the other player to join.');
-          return;
-        }
-        $(this).addClass('selected');
-        const selected = parseInt($(this).attr('id'))
-        selected_numbers.push(selected);
-        endTurn(selected);
-      });
-    });
-  </script>
 </html>
