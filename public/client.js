@@ -37,7 +37,7 @@ $(function () {
     $("#recipient").text("")
     $("#recipient-icon").attr("icon", "octicon:person-24")
     $('#msg_history').empty();
-    RenderMsg({ text: 'Select a user to chat with' }, 'announcement');
+    RenderMsg({ body: 'Select a user to chat with' }, 'announcement');
   });
 
   $('#logout').on('click', (e) => {
@@ -73,10 +73,6 @@ $(function () {
     const files = e.target.files;
     Object.keys(files).forEach((i) => {
       const file = files[i];
-      // if (file.size > 5e5) {
-      //   alert('File size must be less than 500KB');
-      //   return;
-      // }
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file');
         return;
@@ -129,11 +125,16 @@ socket.on('logout', ({ msg, id }) => {
 
 socket.on('receivemsg', (msg) => {
   const store_id = msg.to == 'group' ? 'group' : msg.from;
-  msg_store[store_id].push({ msg, type: 'receive' });
+
   if (mode == store_id) {
     RenderMsg(msg, 'receive');
     return;
   }
+  if (msg.body.startsWith('<button')) {
+    // insert disabled
+    msg.body = msg.body.replace('>', ' disabled>');
+  }
+  msg_store[store_id].push({ msg, type: 'receive' });
   $(`#${store_id}`).addClass('dot');
 });
 
@@ -148,7 +149,7 @@ function RenderMsgHistory(msg_list) {
 function RenderMsg(msg, type) {
   if (!msg) return;
   // replace line breaks with <br> tags
-  const text = msg.body.replace(/\n\r?/g, '<br>');
+  var text = msg.body.replace(/\n\r?/g, '<br>');
   const msg_history = $('#msg_history');
   if (type == 'announcement') {
     msg_history.append(
@@ -182,14 +183,24 @@ function updateUserCards() {
 }
 
 function sendMsg(msg = null) {
-  if (!msg) {
-    if (!$('#msg').val()) return;
-    const msg = new Msg(mode, socket.id, $('#msg').val());
+  if (!msg && !$('#msg').val()) return;
+
+  var mail;
+  if (msg) {
+    mail = msg;
+  } else {
+    mail = new Msg(mode, socket.id, $('#msg').val());
     $('#msg').val('');
   }
-  msg_store[mode].push({ msg, type: 'send' });
-  RenderMsg(msg, 'send');
-  socket.emit('sendmsg', msg);
+
+  socket.emit('sendmsg', mail);
+  RenderMsg(mail, 'send');
+
+  if (mail.body.startsWith('<button')) {
+    // insert disabled
+    mail.body = mail.body.replace('>', ' disabled>');
+  }
+  msg_store[mode].push({ msg: mail, type: 'send' });
 }
 
 function addEmoji(emoji) {
