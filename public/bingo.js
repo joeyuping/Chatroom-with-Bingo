@@ -163,7 +163,10 @@ function cancelBingo() {
 
 socket.on('exitBingo', ({ from, roomID }) => {
   $(`#${roomID}`).attr('disabled', true);
-  msg_store[from].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`)).body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
+  const found_invitation = msg_store[from].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`))
+  if (found_invitation) {
+    found_invitation.msg.body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
+  }
   leaveBingo();
 });
 
@@ -174,7 +177,10 @@ function exitBingo() {
 
 function leaveBingo() {
   roomID = roomID_client;
-  msg_store[mode].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`)).body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
+  const found_invitation = msg_store[mode].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`))
+  if (found_invitation) {
+    found_invitation.msg.body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
+  }
   $('#bingo').addClass('animate-fade-out')
   setTimeout(() => {
     resetBingo();
