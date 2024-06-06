@@ -79,8 +79,6 @@ $(function () {
       }
       const reader = new FileReader();
       reader.onload = (e) => {
-        // log size of e.target.result
-        console.log('Size of image:', e.target.result.length);
         const msg = new Msg(mode, socket.id, `<img src="${e.target.result}" alt="image" class="w-64">`);
         sendMsg(msg);
       };

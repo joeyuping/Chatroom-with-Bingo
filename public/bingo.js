@@ -114,6 +114,7 @@ function shuffle() {
       }
     });
     $('#bingo-board').html(dices.join(''));
+    checkBingo();
   }, 2000);
 }
 
@@ -137,12 +138,11 @@ function endTurn(num = null) {
 function checkBingo() {
   num_lines = 0;
   for (let i = 0; i < bingo_numbers.length; i++) {
-    const bingo = bingo_numbers[i];
-    if (bingo.every((num) => selected_numbers.includes(num))) {
+    if (bingo_numbers[i].every((num) => selected_numbers.includes(num))) {
       num_lines++;
-      $('#num-lines').text(num_lines);
     }
   }
+  $('#num-lines').text(num_lines);
   if (num_lines >= 5) {
     socket.emit('endGame', { to: mode, roomID: roomID_client });
     $('#win').show();
@@ -158,29 +158,34 @@ socket.on('endGame', () => {
 function cancelBingo() {
   socket.emit('exitBingo', { to: mode, from: socket.id, roomID: roomID_client });
   sendMsg(new Msg(mode, socket.id, 'The Bingo game was canceled'));
+  disableInvitation(mode, roomID_client);
   leaveBingo();
 }
 
 socket.on('exitBingo', ({ from, roomID }) => {
   $(`#${roomID}`).attr('disabled', true);
-  const found_invitation = msg_store[from].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`))
-  if (found_invitation) {
-    found_invitation.msg.body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
-  }
+  disableInvitation(from);
   leaveBingo();
 });
 
 function exitBingo() {
   socket.emit('exitBingo', { to: mode, roomID: roomID_client });
+  disableInvitation(mode);
   leaveBingo();
+}
+
+function disableInvitation(id) {
+  if (!msg_store[id]) return;
+  const found_invitation = msg_store[id].filter((msg) => msg.msg.body.includes(`<button`))
+  if (found_invitation) {
+    found_invitation.forEach((invitation) => {
+      invitation.msg.body = invitation.msg.body.replace("\">", "\" disabled>")
+    });
+  }
 }
 
 function leaveBingo() {
   roomID = roomID_client;
-  const found_invitation = msg_store[mode].find((msg) => msg.msg.body.includes(`<button id="${roomID}"`))
-  if (found_invitation) {
-    found_invitation.msg.body = `<button id="${roomID}" name="bingo" onclick="joinBingo('${roomID}')" disabled>Lets play Bingo!\n>>>>>>>>>> GO!</button>`;
-  }
   $('#bingo').addClass('animate-fade-out')
   setTimeout(() => {
     resetBingo();

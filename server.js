@@ -41,7 +41,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (reason) => {
-    console.log(reason)
     const announcement = `${users[socket.id]} left`;
     delete users[socket.id];
     io.emit('logout',
