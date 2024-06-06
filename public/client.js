@@ -87,6 +87,19 @@ $(function () {
       reader.readAsDataURL(file);
     });
   });
+
+  $(document).on('contextmenu', '.user-card', (event) => {
+    event.preventDefault();
+    $('#context-menu').css({ top: event.clientY, left: event.clientX }).show();
+    $('#context-menu').on('mouseleave', () => {
+      $('#context-menu').hide();
+    });
+    $('#block').on('click', (e) => {
+      addBlock(event.target.id);
+      $('#context-menu').hide();
+      updateNumUsers();
+    });
+  });
 });
 
 socket.on('welcome', (server_users) => {
@@ -172,10 +185,14 @@ function updateUserCards() {
 
   for (const user_id in users) {
     if (user_id == socket.id) continue;
-
     $('#online_users').append(`
     <li class="user-card flex items-center relative" id="${user_id}"><iconify-icon class="mr-2" icon="carbon:user-avatar-filled-alt" width="28"></iconify-icon>${users[user_id]}</li>`)
   }
+}
+
+function addBlock(user_id) {
+  delete users[user_id];
+  $(`#${user_id}`).remove();
 }
 
 function sendMsg(msg = null) {

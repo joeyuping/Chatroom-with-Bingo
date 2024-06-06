@@ -50,6 +50,9 @@
         <ul class="mt-5" id="online_users">
         </ul>
       </div>
+      <div id="context-menu" class="bg-gray-300/50 w-28 absolute z-10 hidden p-2 rounded">
+        <button class="hover:brightness-105 w-full py-1 bg-gray-300" id="block">Block</button>
+      </div>
 
       <div id="chatroom" class="bg-white/50 flex flex-col flex-grow p-3 mt-2 ml-2 rounded shadow">
         <div class="flex px-2 my-2">
@@ -116,7 +119,7 @@
           <div id="shuffle" class="rounded-xl bg-white/70 animate-fade-in absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full select-none" style="display: none">
             <div class="animate-pulse z-10 text-3xl font-bold select-none">You clicked on </div><span id="shuffle-card" class="animate-fade-down rainbow-text z-10 text-3xl font-bold select-none">SHUFFLE</span>
           </div>
-
+        </div>
       </div>
     </div>
   </body>
